@@ -1,0 +1,315 @@
+from google.colab import drive
+drive.mount('/content/drive')
+
+# Load libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+
+### Access Dataset
+
+# Access Dataset
+data = pd.read_csv('/content/BankNote_Authentication.csv')
+# Data preparation and Exploration
+print('Number of Rows: ', data.shape[0])
+print('Number of Columns: ', data.shape[1], '\n')
+print('SubSet of Data:\n ', data.head(), '\n')
+
+### Define columns names
+
+# labeling data
+labels = ['Variance', 'Skewness', 'Kurtosis', 'Entropy', 'Target']
+data.columns = labels
+print('Columns Names:', data.columns, '\n')
+print('Data Describe:\n ', data.describe(), '\n')
+print('Data Information:'); print(data.info())
+
+### Check For duplicated values
+
+# Check For duplicated
+print(data.duplicated().any())
+duplicated = data.duplicated()
+print('Number of duplicated data: ', duplicated[duplicated == True].size)
+
+### Check correlation
+
+# Check correlation
+print('Correlation:')
+print(data.corr()['Target'].sort_values(ascending=False))
+sns.heatmap(data.corr(), annot=True, cmap="RdBu")
+plt.show()
+
+print('Number of Authentication= ', data['Target'][data['Target'] == 0].count())
+print('Number of Unauthenticated= ', data['Target'][data['Target'] == 1].count())
+
+# Data Visualization
+
+# Data histogram
+data.hist()
+plt.show()
+
+#### From above histograms: kurtosis is positive skewness && Entropy is negative Skewness
+
+
+sns.pairplot(data=data, hue='Target')
+plt.show()
+
+### Data Split
+
+# Data Split
+x = data.drop('Target', axis=1).values
+y = data['Target'].values
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+print(X_train.shape)
+print(y_train.shape)
+
+# Logistic Regression
+
+# Logistic Regression
+log = LogisticRegression()
+
+# fitting data
+model = log.fit(X_train, y_train)
+
+# Predicted data
+y_predicted = log.predict(X_test)
+
+# Logistic Regression Results
+print('Classification Report:')
+print(metrics.classification_report(y_test, y_predicted))
+
+# Accuarcy score matrix
+print('Accuracy of Logistic Regression Algorithm: '
+      , metrics.accuracy_score(y_test, y_predicted)*100)
+
+# F1 Score
+f1_score_log = metrics.f1_score(y_test, y_predicted, average='micro')
+
+# Confusion martrix
+cm_log = metrics.confusion_matrix(y_test, y_predicted)
+
+# recall
+recall_log = metrics.recall_score(y_test, y_predicted)
+
+# Heatmap confusion matrix
+sns.heatmap(cm_log, annot=True, fmt=".0f", linewidths=3, square=True, cmap='Blues', color="#cd1076")
+plt.ylabel('actual label')
+plt.xlabel('predicted label')
+
+# show F1 Score and Recall
+plt.title(f'F1 Score [Logistic Regression Algorithm]: {f1_score_log:.2f}\n'
+          f'Recall [Logistic Regression Algorithm]: {recall_log:.2f}', size=14, color='black')
+plt.show()
+
+# KNN Algorithm
+
+# KNN Algorithm
+knn = KNeighborsClassifier(n_neighbors=5)
+
+# fitting training data
+knn.fit(X_train, y_train)
+
+# predicted data
+y_predicted = knn.predict(X_test)
+
+# KNN Results
+
+# Classification Report
+print("Classification Report")
+print(metrics.classification_report(y_test, y_predicted))
+
+
+# Accuracy Score matrix
+print('Accuracy of KNN Algorithm: '
+      , metrics.accuracy_score(y_test, y_predicted)*100)
+
+# F1 Score
+f1_score_knn = metrics.f1_score(y_test, y_predicted, average='micro')
+
+# Confusion matrix
+cm_knn = metrics.confusion_matrix(y_test, y_predicted)
+
+# recall
+recall_KNN = metrics.recall_score(y_test, y_predicted)
+
+# Heatmap confusion matrix
+sns.heatmap(cm_knn, annot=True, fmt=".0f", linewidths=3, square=True, cmap='Blues', color="#cd1076")
+plt.ylabel('actual label')
+plt.xlabel('predicted label')
+
+# show F1 Score and Recall
+plt.title(f'F1 Score [KNN Algorithm]: {f1_score_knn:.2f}\n'
+          f'Recall [KNN Algorithm]: {recall_KNN:.2f}', size=14, color='black')
+plt.show()
+
+# Naive Bayes Algorithm
+
+# Naive Bayes Algorithm
+gnb = GaussianNB()
+
+# fitting training data
+model = gnb.fit(X_train, y_train)
+
+# predicted data
+y_predicted = gnb.predict(X_test)
+
+
+# Naive Bayes Results
+print('Classification Report:')
+print(metrics.classification_report(y_test, y_predicted))
+
+# Accuracy Score matrix
+print('Accuracy of Naive Bayes Algorithm: '
+      , metrics.accuracy_score(y_test, y_predicted)*100)
+
+# F1 Score
+f1_score_NB = metrics.f1_score(y_test, y_predicted, average='micro')
+
+# Confusion matrix
+cm_mnb = metrics.confusion_matrix(y_test, y_predicted)
+
+# recall
+recall_NB = metrics.recall_score(y_test, y_predicted)
+
+# Heatmap confusion matrix
+sns.heatmap(cm_mnb, annot=True, fmt=".0f", linewidths=3, square=True, cmap='Blues', color="#cd1076")
+plt.ylabel('actual label')
+plt.xlabel('predicted label')
+
+# show F1 Score and Recall
+plt.title(f'F1 Score [Naive Bayes Algorithm]: {f1_score_NB:.2f}\n'
+          f'Recall [NB Algorithm]: {recall_NB:.2f}', size=14, color='black')
+plt.show()
+
+## SVM
+
+# Support Vector Machine
+# The best SVM "rdf kernel and C=100"
+# SVM with c=100.0
+svm = SVC(kernel='rbf', C=100.0)
+
+# Fitting data
+svm.fit(X_train, y_train)
+
+# predicted data
+y_predict = svm.predict(X_test)
+
+
+# SVM Results
+print('Classification Reports:')
+print(metrics.classification_report(y_test, y_predicted))
+
+# Accuracy score matrix
+print('Accuracy of SVM Algorithm: '
+      , metrics.accuracy_score(y_test, y_predicted)*100)
+
+# F1 Score
+f1_score_SVM = metrics.f1_score(y_test, y_predicted, average='micro')
+
+# confusion matrix
+cm_SVM = metrics.confusion_matrix(y_test, y_predicted)
+
+# recall
+recall_SVM = metrics.recall_score(y_test, y_predicted)
+
+# Heatmap confusion matrix
+sns.heatmap(cm_log, annot=True, fmt=".0f", linewidths=3, square=True, cmap='Blues', color="#cd1076")
+plt.ylabel('actual label')
+plt.xlabel('predicted label')
+
+# show F1 Score and Recall
+plt.title(f'F1 Score [SVM Algorithm]: {f1_score_SVM:.2f}\n'
+          f'Recall [SVM Algorithm]: {recall_SVM:.2f}', size=14, color='black')
+plt.show()
+print('\n')
+
+## RANDOM FOREST
+
+# Random Forest Algorithm
+
+from sklearn.ensemble import RandomForestClassifier
+
+# Create a Random Forest Classifier
+rf = RandomForestClassifier(n_estimators=100, random_state=42)  # You can adjust the number of estimators as needed
+
+# Fit the training data to the Random Forest model
+rf.fit(X_train, y_train)
+
+# Predict on the test data
+y_predicted = rf.predict(X_test)
+
+# Random Forest Results
+print("Random Forest Classification Report:")
+print(metrics.classification_report(y_test, y_predicted))
+
+# Accuracy Score matrix
+print('Accuracy of Random Forest Algorithm: ', metrics.accuracy_score(y_test, y_predicted) * 100)
+
+# F1 Score
+f1_score_rf = metrics.f1_score(y_test, y_predicted, average='micro')
+
+# Confusion matrix
+cm_rf = metrics.confusion_matrix(y_test, y_predicted)
+
+# Recall
+recall_rf = metrics.recall_score(y_test, y_predicted)
+
+# Heatmap confusion matrix
+sns.heatmap(cm_rf, annot=True, fmt=".0f", linewidths=3, square=True, cmap='Blues', color="#cd1076")
+plt.ylabel('Actual Label')
+plt.xlabel('Predicted Label')
+
+# Show F1 Score and Recall
+plt.title(f'F1 Score [Random Forest Algorithm]: {f1_score_rf:.2f}\n'
+          f'Recall [Random Forest Algorithm]: {recall_rf:.2f}', size=14, color='black')
+plt.show()
+
+# Comparison between Algorithms by "F1 Score and Recall"
+
+plt.figure(figsize=(12, 6))
+model_f1_score = [f1_score_SVM, f1_score_log, f1_score_knn, f1_score_NB, f1_score_rf]
+recalls = [recall_SVM, recall_log, recall_KNN, recall_NB, recall_rf]
+model_name = ['SVM', 'LogisticRegression', 'KNN', 'Naive Bayes', 'Random Forest']
+recall_name = ['SVM', 'LogisticRegression', 'KNN', 'Naive Bayes', 'Random Forest']
+
+# Barplot f1 score
+sns.barplot(x=model_f1_score, y=model_name, palette='magma')
+plt.title('Algorithms F1 Score')
+plt.show()
+
+# Barplot recall
+sns.barplot(x=recalls, y=recall_name, palette='magma')
+plt.title('Algorithms Recall')
+plt.show()
+
+## The best Algorithm for this project is K-Nearest neighbours
+
+
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
+# Input the feature values for the banknote you want to classify
+# Replace these values with the actual feature values of the banknote you want to classify
+new_banknote_features = np.array([[0.33325,3.3108,-4.5081,-4.012]])
+
+# Load the trained KNN model (assuming the model was trained as in the provided code)
+knn = KNeighborsClassifier(n_neighbors=5)  # Use the same KNN configuration as in your code
+knn.fit(X_train, y_train)  # Assuming X_train and y_train are your training data
+
+# Predict whether the banknote is real (1) or fake (0)
+prediction = knn.predict(new_banknote_features)
+
+if prediction == 1:
+    print("The banknote is predicted to be real.")
+else:
+    print("The banknote is predicted to be fake.")
